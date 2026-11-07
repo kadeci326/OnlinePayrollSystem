@@ -1,4 +1,4 @@
-
+import { supabase } from "./supabase-config.js";
 /* ==========================================
    ONLINE EMPLOYEE PAYROLL MANAGEMENT SYSTEM
    JavaScript Functionality
