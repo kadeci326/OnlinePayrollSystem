@@ -1,6 +1,6 @@
-   const CACHE_NAME = "payroll-app-v2";
+ const CACHE_NAME = "payroll-app-v2";
 
- const FILES_TO_CACHE = [
+const FILES_TO_CACHE = [
     "./",
     "./index.html",
     "./style.css",
@@ -10,7 +10,6 @@
     "./payroll-icon-512.png"
 ];
 
-// Install and save website files
 self.addEventListener("install", event => {
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
@@ -21,7 +20,6 @@ self.addEventListener("install", event => {
     self.skipWaiting();
 });
 
-// Activate the service worker
 self.addEventListener("activate", event => {
     event.waitUntil(
         caches.keys().then(keys => {
@@ -36,7 +34,6 @@ self.addEventListener("activate", event => {
     self.clients.claim();
 });
 
-// Load saved files when offline
 self.addEventListener("fetch", event => {
     if (event.request.method !== "GET") return;
 
