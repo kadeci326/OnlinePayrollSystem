@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Payroll Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h2 id="companyName">Company Payroll Dashboard</h2>
+        <button id="logoutButton">Logout</button>
+    </header>
+
+    <main>
+        <h1>Welcome to Your Payroll Dashboard</h1>
+        <p>Manage your company's employees and payroll.</p>
+
+        <section>
+            <h3>Company Information</h3>
+            <p>Company: <span id="companyDetails">Loading...</span></p>
+            <p>Owner: <span id="ownerDetails">Loading...</span></p>
+        </section>
+
+        <section>
+            <h3>Payroll Overview</h3>
+            <div>
+                <p>Total Employees</p>
+                <h2 id="totalEmployees">0</h2>
+            </div>
+            <div>
+                <p>Monthly Gross Payroll</p>
+                <h2 id="totalPayroll">Ksh 0</h2>
+            </div>
+        </section>
+
+        <section>
+            <h3>Employee Management</h3>
+
+            <form id="employeeForm">
+                <label>Employee Name</label>
+                <input type="text" id="employeeName" required>
+
+                <label>Email Address</label>
+                <input type="email" id="employeeEmail">
+
+                <label>Phone Number</label>
+                <input type="tel" id="employeePhone">
+
+                <label>Basic Salary (Ksh)</label>
+                <input type="number" id="basicSalary" min="0" required>
+
+                <label>House Allowance (Ksh)</label>
+                <input type="number" id="houseAllowance" min="0" value="0">
+
+                <button type="submit">Add Employee</button>
+            </form>
+
+            <p id="employeeMessage"></p>
+
+            <h3>Employee List</h3>
+            <div id="employeeList">
+                No employees added yet.
+            </div>
+        </section>
+
+    </main>
+
+    <script type="module" src="company.js"></script>
+
+</body>
+</html>

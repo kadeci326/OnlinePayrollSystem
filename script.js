@@ -1,3 +1,4 @@
+
 import { supabase } from "./supabase-config.js";
 /* ==========================================
    ONLINE EMPLOYEE PAYROLL MANAGEMENT SYSTEM
@@ -396,3 +397,71 @@ function initializePayrollSystem() {
 }
 
 initializePayrollSystem();
+// SUPABASE LOGIN SYSTEM
+
+const loginForm = document.getElementById("loginForm");
+const loginScreen = document.getElementById("loginScreen");
+const payrollApp = document.getElementById("payrollApp");
+const loginMessage = document.getElementById("loginMessage");
+
+async function checkUserAccess() {
+
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+        loginScreen.style.display = "block";
+        payrollApp.style.display = "none";
+        return;
+    }
+
+    const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
+        .single();
+
+     if (error || !profile) {
+    await supabase.auth.signOut();
+    loginMessage.textContent = "Your account profile could not be found.";
+    return;
+}
+
+if (profile.role === "company_owner") {
+    window.location.href = "company.html";
+    return;
+}
+
+if (profile.role !== "admin") {
+    await supabase.auth.signOut();
+    loginMessage.textContent = "You do not have administrator access.";
+    return;
+}
+    }
+
+    loginScreen.style.display = "none";
+    payrollApp.style.display = "block";
+}
+
+loginForm.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    loginMessage.textContent = "Signing in...";
+
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+
+    const { error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
+
+    if (error) {
+        loginMessage.textContent = error.message;
+        return;
+    }
+
+    await checkUserAccess();
+});
+
+checkUserAccess();
