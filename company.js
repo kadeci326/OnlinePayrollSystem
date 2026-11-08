@@ -64,11 +64,18 @@ async function loadCompany() {
 async function loadEmployees() {
     if (!currentCompany) return;
 
-    const { data: employees, error } = await supabase
-        .from("employees")
-        .select("*")
-        .eq("company_id", currentCompany.id)
-        .order("created_at", { ascending: false });
+     const { data, error } = await supabase
+    .from("employees")
+    .insert([employee])
+    .select();
+
+if (error) {
+    employeeMessage.style.color = "red";
+    employeeMessage.textContent = "Could not save employee: " + error.message;
+    return;
+}
+
+console.log("Saved employee:", data);
 
     if (error) {
         employeeMessage.textContent = "Could not load employees: " + error.message;
