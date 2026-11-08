@@ -1,18 +1,13 @@
-import { supabase } from "./supabase-config.js";
+ import { supabase } from "./supabase-config.js";
 
-const registrationForm = document.getElementById(
-    "companyRegistrationForm"
-);
-
-const registrationMessage = document.getElementById(
-    "registrationMessage"
-);
+const registrationForm = document.getElementById("companyRegistrationForm");
+const registrationMessage = document.getElementById("registrationMessage");
 
 registrationForm.addEventListener("submit", async function(event) {
-
     event.preventDefault();
 
-    registrationMessage.textContent = "Creating your company account...";
+    registrationMessage.style.color = "blue";
+    registrationMessage.textContent = "Registering your company...";
 
     const companyName = document.getElementById("companyName").value.trim();
     const ownerName = document.getElementById("ownerName").value.trim();
@@ -21,37 +16,38 @@ registrationForm.addEventListener("submit", async function(event) {
     const password = document.getElementById("companyPassword").value;
 
     try {
-
         const { data, error } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-
+            email,
+            password,
             options: {
                 data: {
                     company_name: companyName,
                     owner_name: ownerName,
                     phone: phone
                 },
-                emailRedirectTo: window.location.origin + "/OnlinePayrollSystem/"
+                emailRedirectTo: "https://kadeci326.github.io/OnlinePayrollSystem/"
             }
         });
 
         if (error) {
-            registrationMessage.textContent = error.message;
+            registrationMessage.style.color = "red";
+            registrationMessage.textContent = "Registration failed: " + error.message;
             return;
         }
 
-        registrationMessage.textContent =
-            "Registration submitted! Check your email to confirm your account.";
-
-        registrationForm.reset();
+        if (data.user) {
+            registrationMessage.style.color = "green";
+            registrationMessage.textContent =
+                "Account created successfully! Check your email to confirm registration.";
+        } else {
+            registrationMessage.style.color = "red";
+            registrationMessage.textContent =
+                "No account was returned. Please try again.";
+        }
 
     } catch (error) {
-
+        registrationMessage.style.color = "red";
         registrationMessage.textContent =
-            "Something went wrong. Please try again.";
-
-        console.error(error);
+            "Error: " + error.message;
     }
-
 });
