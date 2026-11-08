@@ -75,7 +75,14 @@ if (error) {
     return;
 }
 
-console.log("Saved employee:", data);
+ console.log("SUPABASE INSERT RESULT:", data, error);
+
+if (!data || data.length === 0) {
+    employeeMessage.style.color = "red";
+    employeeMessage.textContent =
+        "No employee record was returned by Supabase.";
+    return;
+}
 
     if (error) {
         employeeMessage.textContent = "Could not load employees: " + error.message;
