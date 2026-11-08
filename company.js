@@ -68,6 +68,8 @@ async function loadEmployees() {
     .from("employees")
     .insert([employee])
     .select();
+    console.log("EMPLOYEES FROM DATABASE:", employees);
+console.log("DATABASE ERROR:", error);
 
 if (error) {
     employeeMessage.style.color = "red";
