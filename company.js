@@ -61,15 +61,62 @@ async function loadCompany() {
 }
 
 // Load employees belonging to this company
+ 
 async function loadEmployees() {
     if (!currentCompany) return;
 
-     const { data, error } = await supabase
-    .from("employees")
-    .insert([employee])
-    .select();
+    const { data: employees, error } = await supabase
+        .from("employees")
+        .select("*")
+        .eq("company_id", currentCompany.id)
+        .order("created_at", { ascending: false });
+
     console.log("EMPLOYEES FROM DATABASE:", employees);
-console.log("DATABASE ERROR:", error);
+    console.log("DATABASE ERROR:", error);
+
+    if (error) {
+        employeeMessage.textContent =
+            "Could not load employees: " + error.message;
+        return;
+    }
+
+    totalEmployees.textContent = employees.length;
+    employeeList.replaceChildren();
+
+    if (employees.length === 0) {
+        employeeList.textContent = "No employees added yet.";
+    }
+
+    let payrollTotal = 0;
+
+    for (const employee of employees) {
+        payrollTotal += Number(employee.basic_salary || 0) +
+                        Number(employee.house_allowance || 0);
+
+        const card = document.createElement("div");
+        const name = document.createElement("h4");
+        const email = document.createElement("p");
+        const phone = document.createElement("p");
+        const salary = document.createElement("p");
+
+        name.textContent = employee.employee_name;
+        email.textContent = "Email: " +
+            (employee.email || "Not provided");
+        phone.textContent = "Phone: " +
+            (employee.phone || "Not provided");
+
+        salary.textContent =
+            "Basic salary: " + formatMoney(employee.basic_salary) +
+            " | House allowance: " +
+            formatMoney(employee.house_allowance);
+
+        card.append(name, email, phone, salary);
+        employeeList.appendChild(card);
+    }
+
+    totalPayroll.textContent = formatMoney(payrollTotal);
+}
+
 
 if (error) {
     employeeMessage.style.color = "red";
