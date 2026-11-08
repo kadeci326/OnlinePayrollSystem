@@ -1,4 +1,4 @@
-
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +7,7 @@
     <title>Company Payroll Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <header>
@@ -26,10 +27,12 @@
 
         <section>
             <h3>Payroll Overview</h3>
+
             <div>
                 <p>Total Employees</p>
                 <h2 id="totalEmployees">0</h2>
             </div>
+
             <div>
                 <p>Monthly Gross Payroll</p>
                 <h2 id="totalPayroll">Ksh 0</h2>
@@ -40,6 +43,7 @@
             <h3>Employee Management</h3>
 
             <form id="employeeForm">
+
                 <label>Employee Name</label>
                 <input type="text" id="employeeName" required>
 
@@ -56,16 +60,15 @@
                 <input type="number" id="houseAllowance" min="0" value="0">
 
                 <button type="submit">Add Employee</button>
+
             </form>
 
             <p id="employeeMessage"></p>
 
             <h3>Employee List</h3>
-            <div id="employeeList">
-                No employees added yet.
-            </div>
-        </section>
+            <div id="employeeList">Loading employees...</div>
 
+        </section>
     </main>
 
     <script type="module" src="company.js"></script>
