@@ -71,6 +71,41 @@
         </section>
     </main>
 
+<section>
+    <h3>Payroll Processing</h3>
+
+    <form id="payrollForm">
+
+        <label>Select Employee</label>
+        <select id="payrollEmployee" required>
+            <option value="">Select Employee</option>
+        </select>
+
+        <label>Payroll Month</label>
+        <input type="month" id="payrollMonth" required>
+
+        <label>Basic Salary (Ksh)</label>
+        <input type="number" id="payrollBasicSalary" readonly>
+
+        <label>House Allowance (Ksh)</label>
+        <input type="number" id="payrollHouseAllowance" readonly>
+
+        <label>Other Deductions (Ksh)</label>
+        <input type="number" id="payrollDeductions" min="0" value="0" required>
+
+        <button type="submit">Calculate Payroll</button>
+
+    </form>
+
+    <div id="payrollResults">
+        <h3>Payroll Results</h3>
+        <p>Gross Salary: <span id="grossSalary">Ksh 0</span></p>
+        <p>Deductions: <span id="deductionAmount">Ksh 0</span></p>
+        <p>Net Salary: <span id="netSalary">Ksh 0</span></p>
+        <p id="payrollMessage"></p>
+    </div>
+</section>
+
     <script type="module" src="company.js"></script>
 
 </body>

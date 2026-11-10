@@ -161,6 +161,40 @@ async function loadEmployees() {
     }
 
     totalEmployees.textContent = employees.length;
+
+const payrollEmployeeSelect =
+    document.getElementById("payrollEmployee");
+
+payrollEmployeeSelect.replaceChildren();
+
+const defaultOption = document.createElement("option");
+defaultOption.value = "";
+defaultOption.textContent = "Select Employee";
+payrollEmployeeSelect.appendChild(defaultOption);
+
+for (const employee of employees) {
+    const option = document.createElement("option");
+    option.value = employee.id;
+    option.textContent = employee.employee_name;
+    payrollEmployeeSelect.appendChild(option);
+    payrollEmployeeSelect.onchange = function() {
+    const selectedEmployee = employees.find(
+        employee => employee.id === payrollEmployeeSelect.value
+    );
+
+    if (!selectedEmployee) {
+        document.getElementById("payrollBasicSalary").value = "";
+        document.getElementById("payrollHouseAllowance").value = "";
+        return;
+    }
+
+    document.getElementById("payrollBasicSalary").value =
+        selectedEmployee.basic_salary;
+
+    document.getElementById("payrollHouseAllowance").value =
+        selectedEmployee.house_allowance || 0;
+};
+
     employeeList.replaceChildren();
 
     if (employees.length === 0) {
@@ -282,6 +316,94 @@ employeeForm.addEventListener("submit", async function(event) {
     document.getElementById("houseAllowance").value = 0;
 
     await loadEmployees();
+});
+
+// PROCESS AND SAVE PAYROLL
+const payrollForm = document.getElementById("payrollForm");
+
+payrollForm.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const employeeId =
+        document.getElementById("payrollEmployee").value;
+
+    const month =
+        document.getElementById("payrollMonth").value;
+
+    const basicSalary = Number(
+        document.getElementById("payrollBasicSalary").value
+    );
+
+    const houseAllowance = Number(
+        document.getElementById("payrollHouseAllowance").value
+    );
+
+    const deductions = Number(
+        document.getElementById("payrollDeductions").value
+    );
+
+    const payrollMessage =
+        document.getElementById("payrollMessage");
+
+    if (!employeeId || !month) {
+        payrollMessage.textContent =
+            "Please select an employee and payroll month.";
+        return;
+    }
+
+    if (
+        !Number.isFinite(basicSalary) ||
+        !Number.isFinite(houseAllowance) ||
+        !Number.isFinite(deductions) ||
+        deductions < 0
+    ) {
+        payrollMessage.textContent =
+            "Please enter valid salary and deduction amounts.";
+        return;
+    }
+
+    const gross = basicSalary + houseAllowance;
+    const net = gross - deductions;
+
+    if (deductions > gross) {
+        payrollMessage.textContent =
+            "Deductions cannot be greater than gross salary.";
+        return;
+    }
+
+    document.getElementById("grossSalary").textContent =
+        formatMoney(gross);
+
+    document.getElementById("deductionAmount").textContent =
+        formatMoney(deductions);
+
+    document.getElementById("netSalary").textContent =
+        formatMoney(net);
+
+    payrollMessage.textContent = "Saving payroll...";
+
+    const { data, error } = await supabase
+        .from("payroll_records")
+        .insert([{
+            company_id: currentCompany.id,
+            employee_id: employeeId,
+            pay_period: month,
+            gross_salary: gross,
+            deduction: deductions,
+            net_salary: net
+        }])
+        .select();
+
+    if (error) {
+        payrollMessage.style.color = "red";
+        payrollMessage.textContent =
+            "Payroll could not be saved: " + error.message;
+        return;
+    }
+
+    payrollMessage.style.color = "green";
+    payrollMessage.textContent =
+        "Payroll calculated and saved successfully!";
 });
 
 // LOGOUT
