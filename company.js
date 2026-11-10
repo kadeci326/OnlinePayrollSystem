@@ -18,6 +18,71 @@ function formatMoney(amount) {
 }
 
 async function loadCompany() {
+
+async function editEmployee(employee) {
+    const newName = prompt("Enter employee name:", employee.employee_name);
+    if (newName === null || newName.trim() === "") return;
+
+    const newSalary = prompt("Enter basic salary:", employee.basic_salary);
+    if (newSalary === null || newSalary.trim() === "") return;
+
+    const newAllowance = prompt(
+        "Enter house allowance:",
+        employee.house_allowance || 0
+    );
+    if (newAllowance === null || newAllowance.trim() === "") return;
+
+    if (
+        !Number.isFinite(Number(newSalary)) ||
+        !Number.isFinite(Number(newAllowance)) ||
+        Number(newSalary) < 0 ||
+        Number(newAllowance) < 0
+    ) {
+        alert("Please enter valid salary amounts.");
+        return;
+    }
+
+    const { error } = await supabase
+        .from("employees")
+        .update({
+            employee_name: newName.trim(),
+            basic_salary: Number(newSalary),
+            house_allowance: Number(newAllowance)
+        })
+        .eq("id", employee.id)
+        .eq("company_id", currentCompany.id);
+
+    if (error) {
+        alert("Update failed: " + error.message);
+        return;
+    }
+
+    alert("Employee updated successfully!");
+    await loadEmployees();
+}
+
+async function deleteEmployee(employee) {
+    const confirmed = confirm(
+        "Are you sure you want to delete " + employee.employee_name + "?"
+    );
+
+    if (!confirmed) return;
+
+    const { error } = await supabase
+        .from("employees")
+        .delete()
+        .eq("id", employee.id)
+        .eq("company_id", currentCompany.id);
+
+    if (error) {
+        alert("Delete failed: " + error.message);
+        return;
+    }
+
+    alert("Employee deleted successfully!");
+    await loadEmployees();
+}
+
     const { data: { session }, error: sessionError } =
         await supabase.auth.getSession();
 
@@ -107,8 +172,25 @@ async function loadEmployees() {
             " | House allowance: " +
             formatMoney(employee.house_allowance);
 
-        card.append(name, email, phone, salary);
-        employeeList.appendChild(card);
+         const editButton = document.createElement("button");
+editButton.textContent = "Edit Employee";
+editButton.onclick = () => editEmployee(employee);
+
+const deleteButton = document.createElement("button");
+deleteButton.textContent = "Delete Employee";
+deleteButton.style.backgroundColor = "red";
+deleteButton.onclick = () => deleteEmployee(employee);
+
+card.append(
+    name,
+    email,
+    phone,
+    salary,
+    editButton,
+    deleteButton
+);
+
+employeeList.appendChild(card);
     }
 
     totalPayroll.textContent = formatMoney(payrollTotal);
