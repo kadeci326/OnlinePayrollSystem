@@ -21,9 +21,9 @@ async function loadCompany() {
     const { data: { session }, error: sessionError } =
         await supabase.auth.getSession();
 
-    if (sessionError || !session) {
-        window.location.href = "index.html";
-        return;
+     if (sessionError || !session) {
+    window.location.href = "company-login.html";
+    return;
     }
 
     const { data: profile, error: profileError } = await supabase
