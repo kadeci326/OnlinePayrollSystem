@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main>
+        <section>
+            <h1>Company Login</h1>
+            <p>Sign in to access your payroll dashboard.</p>
+
+            <form id="companyLoginForm">
+                <label>Email Address</label>
+                <input type="email" id="email" required>
+
+                <label>Password</label>
+                <input type="password" id="password" required>
+
+                <button type="submit">Login</button>
+            </form>
+
+            <p id="loginMessage"></p>
+
+            <p>
+                Don't have an account?
+                <a href="register.html">Register your company</a>
+            </p>
+        </section>
+    </main>
+
+    <script type="module">
+        import { supabase } from "./supabase-config.js";
+
+        const form = document.getElementById("companyLoginForm");
+        const message = document.getElementById("loginMessage");
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            message.textContent = "Signing in...";
+
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+
+            if (error) {
+                message.textContent = error.message;
+                return;
+            }
+
+            const { data: profile, error: profileError } = await supabase
+                .from("profiles")
+                .select("role")
+                .eq("id", data.user.id)
+                .single();
+
+            if (profileError || !profile || profile.role !== "company_owner") {
+                message.textContent = "This account is not a company account.";
+                await supabase.auth.signOut();
+                return;
+            }
+
+            window.location.href = "company.html";
+        });
+    </script>
+
+</body>
+</html>
