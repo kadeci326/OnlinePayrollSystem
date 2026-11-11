@@ -158,6 +158,94 @@ async function loadEmployees() {
         employeeMessage.textContent =
             "Could not load employees: " + error.message;
         return;
+
+const payslipSelect = document.getElementById("payslipRecord");
+
+payslipSelect.replaceChildren();
+
+const defaultOption = document.createElement("option");
+defaultOption.value = "";
+defaultOption.textContent = "Select Payroll Record";
+payslipSelect.appendChild(defaultOption);
+
+for (const record of records) {
+    const employee = employees.find(
+        item => item.id === record.employee_id
+    );
+
+    const option = document.createElement("option");
+    option.value = record.id;
+    option.textContent =
+        (employee ? employee.employee_name : "Unknown employee") +
+        " - " + record.pay_period;
+
+    payslipSelect.appendChild(option);
+
+// GENERATE EMPLOYEE PAYSLIP
+document.getElementById("generatePayslip").onclick = function() {
+    const selectedId = payslipSelect.value;
+
+    const record = records.find(
+        item => item.id === selectedId
+    );
+
+    const display = document.getElementById("payslipDisplay");
+    display.replaceChildren();
+
+    if (!record) {
+        display.textContent = "Please select a payroll record.";
+        return;
+    }
+
+    const employee = employees.find(
+        item => item.id === record.employee_id
+    );
+
+    const heading = document.createElement("h2");
+    heading.textContent = currentCompany.company_name + " - PAYSLIP";
+
+    const employeeName = document.createElement("p");
+    employeeName.textContent =
+        "Employee: " +
+        (employee ? employee.employee_name : "Unknown employee");
+
+    const month = document.createElement("p");
+    month.textContent = "Payroll Month: " + record.pay_period;
+
+    const basic = document.createElement("p");
+    basic.textContent =
+        "Basic Salary: " + formatMoney(record.basic_salary);
+
+    const allowance = document.createElement("p");
+    allowance.textContent =
+        "House Allowance: " + formatMoney(record.house_allowance);
+
+    const gross = document.createElement("p");
+    gross.textContent =
+        "Gross Salary: " + formatMoney(record.gross_salary);
+
+    const deductions = document.createElement("p");
+    deductions.textContent =
+        "Deductions: " + formatMoney(record.deduction);
+
+    const net = document.createElement("h3");
+    net.textContent =
+        "NET SALARY: " + formatMoney(record.net_salary);
+
+    display.append(
+        heading,
+        employeeName,
+        month,
+        basic,
+        allowance,
+        gross,
+        deductions,
+        net
+    );
+};
+
+}
+
     }
 
     totalEmployees.textContent = employees.length;
@@ -477,6 +565,7 @@ payrollForm.addEventListener("submit", async function(event) {
     payrollMessage.style.color = "green";
     payrollMessage.textContent =
         "Payroll calculated and saved successfully!";
+        
 });
 
 // LOGOUT
