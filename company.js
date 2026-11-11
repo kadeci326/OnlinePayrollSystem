@@ -573,6 +573,52 @@ logoutButton.addEventListener("click", async function() {
     await supabase.auth.signOut();
     window.location.href = "company-login.html";
 });
+// PRINT EMPLOYEE PAYSLIP
+document.getElementById("printPayslip").addEventListener("click", function() {
+    const payslip = document.getElementById("payslipDisplay");
+
+    if (!payslip || payslip.innerText.trim() === "") {
+        alert("Please generate a payslip first.");
+        return;
+    }
+
+    const printWindow = window.open("", "_blank");
+
+    if (!printWindow) {
+        alert("Please allow pop-ups to print the payslip.");
+        return;
+    }
+
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Employee Payslip</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 30px;
+                }
+                h2 {
+                    text-align: center;
+                }
+                h3 {
+                    border-top: 1px solid #333;
+                    padding-top: 15px;
+                }
+            </style>
+        </head>
+        <body>
+            ${payslip.innerHTML}
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+});
+
 
 // START DASHBOARD
 loadCompany();
