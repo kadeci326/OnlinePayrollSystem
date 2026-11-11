@@ -17,6 +17,59 @@ let currentCompany = null;
 // Format Kenyan currency
 function formatMoney(amount) {
     return "Ksh " + Number(amount || 0).toLocaleString("en-KE");
+
+// CALCULATE KENYAN STATUTORY DEDUCTIONS
+function calculateStatutoryDeductions(gross) {
+    // NSSF: 6% of pensionable earnings, capped at Ksh 108,000
+    const nssf = Math.min(gross, 108000) * 0.06;
+
+    // SHIF: 2.75%, minimum Ksh 300
+    const shif = gross > 0
+        ? Math.max(300, gross * 0.0275)
+        : 0;
+
+    // Housing Levy: 1.5%
+    const housingLevy = gross * 0.015;
+
+    // PAYE taxable income after allowable SHIF and Housing Levy deductions
+     const taxableIncome = Math.max(
+    0,
+    gross - nssf - shif - housingLevy
+);
+
+    // Calculate tax using monthly PAYE bands
+    let remaining = taxableIncome;
+    let tax = 0;
+
+    const taxBands = [
+        { limit: 24000, rate: 0.10 },
+        { limit: 8333, rate: 0.25 },
+        { limit: 467667, rate: 0.30 },
+        { limit: 300000, rate: 0.325 },
+        { limit: Infinity, rate: 0.35 }
+    ];
+
+    for (const band of taxBands) {
+        const taxable = Math.min(remaining, band.limit);
+        tax += taxable * band.rate;
+        remaining -= taxable;
+
+        if (remaining <= 0) break;
+    }
+
+    // Personal relief for resident employees
+    const paye = Math.max(0, tax - 2400);
+
+    return {
+        paye,
+        nssf,
+        shif,
+        housingLevy,
+        employerNssf: nssf,
+        employerHousingLevy: housingLevy
+    };
+}
+
 }
 
 // EDIT EMPLOYEE
@@ -545,13 +598,29 @@ payrollForm.addEventListener("submit", async function(event) {
 
     const { data, error } = await supabase
         .from("payroll_records")
-        .insert([{
-            company_id: currentCompany.id,
-            employee_id: employeeId,
-            pay_period: month,
-            gross_salary: gross,
-            deduction: deductions,
-            net_salary: net
+        
+.insert([{
+    company_id: currentCompany.id,
+    employee_id: employeeId,
+    pay_period: month,
+    basic_salary: basicSalary,
+    house_allowance: houseAllowance,
+    gross_salary: gross,
+    paye: statutory.paye,
+    nssf: statutory.nssf,
+    shif: statutory.shif,
+    housing_levy: statutory.housingLevy,
+    employer_nssf: statutory.employerNssf,
+    employer_housing_levy: statutory.employerHousingLevy,
+    deduction: totalDeductions,
+    net_salary: net
+}])
+```
+**Important:** Notice that `deduction` now saves `totalDeductions`, not just the other manual deductions.
+
+Save with **Ctrl + S**.
+
+Reply **DONE** when finished.
         }])
         .select();
 
