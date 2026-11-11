@@ -262,6 +262,78 @@ for (const employee of employees) {
     totalPayroll.textContent = formatMoney(payrollTotal);
 }
 
+// LOAD PAYROLL HISTORY
+async function loadPayrollHistory() {
+    const history = document.getElementById("payrollHistory");
+
+    history.textContent = "Loading payroll history...";
+
+    const { data: records, error } = await supabase
+        .from("payroll_records")
+        .select("*")
+        .eq("company_id", currentCompany.id)
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        history.textContent =
+            "Could not load payroll history: " + error.message;
+        return;
+    }
+
+    history.replaceChildren();
+
+    if (!records || records.length === 0) {
+        history.textContent = "No payroll records found yet.";
+        return;
+    }
+
+    const employeeIds = [
+        ...new Set(records.map(record => record.employee_id))
+    ];
+
+    const { data: employees, error: employeeError } = await supabase
+        .from("employees")
+        .select("id, employee_name")
+        .in("id", employeeIds)
+        .eq("company_id", currentCompany.id);
+
+    if (employeeError) {
+        history.textContent =
+            "Could not load employee names: " + employeeError.message;
+        return;
+    }
+
+    for (const record of records) {
+        const employee = employees.find(
+            item => item.id === record.employee_id
+        );
+
+        const card = document.createElement("div");
+
+        const name = document.createElement("h4");
+        name.textContent =
+            employee ? employee.employee_name : "Unknown employee";
+
+        const month = document.createElement("p");
+        month.textContent = "Payroll Month: " + record.pay_period;
+
+        const gross = document.createElement("p");
+        gross.textContent =
+            "Gross Salary: " + formatMoney(record.gross_salary);
+
+        const deduction = document.createElement("p");
+        deduction.textContent =
+            "Deductions: " + formatMoney(record.deduction);
+
+        const net = document.createElement("p");
+        net.textContent =
+            "Net Salary: " + formatMoney(record.net_salary);
+
+        card.append(name, month, gross, deduction, net);
+        history.appendChild(card);
+    }
+}
+
 // ADD EMPLOYEE
 employeeForm.addEventListener("submit", async function(event) {
     event.preventDefault();
@@ -316,6 +388,7 @@ employeeForm.addEventListener("submit", async function(event) {
     document.getElementById("houseAllowance").value = 0;
 
     await loadEmployees();
+    await loadPayrollHistory();
 });
 
 // PROCESS AND SAVE PAYROLL
